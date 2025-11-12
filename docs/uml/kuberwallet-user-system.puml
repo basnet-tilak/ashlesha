@@ -1,0 +1,210 @@
+@startuml
+' Diagram for KuberWallet user and security domain
+hide circle
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+class User {
+  +Long userId
+  +String username
+  +String email
+  +String passwordHash
+  +String passwordSalt
+  +LocalDateTime lastPasswordChange
+  +int failedLoginAttempts
+  +LocalDateTime accountLockedUntil
+  +String lockReason
+  +Boolean termsAccepted
+  +LocalDateTime termsAcceptedAt
+  +String preferredLanguage
+  +String timezone
+  +LocalDateTime lastActivityAt
+  +UserStatus status
+  +LocalDateTime statusChangedAt
+  +String statusChangeReason
+  +addRole(Role role)
+  +removeRole(Role role)
+  +resetPassword(String newPassword)
+  +lockAccount(String reason)
+  +unlockAccount()
+  +enableMFA(MFAType type)
+  +disableMFA()
+}
+
+class UserProfile {
+  +Long profileId
+  +String title
+  +String firstName
+  +String middleName
+  +String lastName
+  +LocalDate dateOfBirth
+  +String phoneNumber
+  +String mobileNumber
+  +Address address
+  +String occupation
+  +String employer
+  +String taxId
+  +String nationalId
+  +String avatarUrl
+  +String bio
+  +Map<String,String> customAttributes
+}
+
+class Address {
+  +String street1
+  +String street2
+  +String city
+  +String state
+  +String postalCode
+  +String country
+  +AddressType type
+}
+
+class LoginHistory {
+  +Long entryId
+  +LocalDateTime loginAt
+  +String ipAddress
+  +String userAgent
+  +String deviceFingerprint
+  +String location
+  +Boolean success
+  +String failureReason
+}
+
+class PasswordHistory {
+  +Long historyId
+  +String passwordHash
+  +String passwordSalt
+  +LocalDateTime changedAt
+  +String changedBy
+}
+
+class MFASetup {
+  +Long mfaId
+  +MFAType type
+  +String secret
+  +String backupCodes
+  +Boolean enabled
+  +LocalDateTime enabledAt
+  +LocalDateTime lastUsed
+}
+
+class APIToken {
+  +Long tokenId
+  +String tokenHash
+  +String name
+  +String[] scopes
+  +LocalDateTime createdAt
+  +LocalDateTime lastUsedAt
+  +LocalDateTime expiresAt
+  +Boolean revoked
+}
+
+class KYCVerification {
+  +Long verificationId
+  +KYCStatus status
+  +VerificationLevel level
+  +String submittedBy
+  +Role submittedByRole
+  +String reviewedBy
+  +Role reviewedByRole
+  +String reviewNotes
+  +Integer riskScore
+  +String riskFactors
+  +LocalDateTime submittedAt
+  +LocalDateTime reviewedAt
+  +LocalDateTime expiryDate
+  +VerificationSource source
+  +approve(String reviewer, String notes)
+  +reject(String reviewer, String notes)
+  +requestResubmission(String reviewer, String notes)
+}
+
+class UserDocument {
+  +Long documentId
+  +DocumentType type
+  +String filePath
+  +String originalFilename
+  +String fileType
+  +Long fileSize
+  +String fileHash
+  +DocumentStatus status
+  +String rejectionReason
+  +LocalDateTime uploadedAt
+  +LocalDateTime verifiedAt
+  +LocalDateTime expiryDate
+  +Integer version
+  +approve()
+  +reject(String reason)
+}
+
+class Role {
+  +Long roleId
+  +String name
+  +String description
+  +Boolean systemRole
+  +LocalDateTime createdAt
+  +LocalDateTime updatedAt
+  +addPermission(Permission permission)
+  +removePermission(Permission permission)
+  +assignToUser(User user)
+  +revokeFromUser(User user)
+}
+
+class Permission {
+  +Long permissionId
+  +String name
+  +String description
+  +String category
+  +String service
+}
+
+class Policy {
+  +Long policyId
+  +String name
+  +String description
+  +String conditions
+  +LocalDateTime createdAt
+  +LocalDateTime updatedAt
+}
+
+class AuditLog {
+  +Long logId
+  +AuditEventType eventType
+  +String description
+  +String ipAddress
+  +String userAgent
+  +String affectedResource
+  +String oldValues
+  +String newValues
+  +LocalDateTime occurredAt
+  +Boolean success
+}
+
+class ConsentRecord {
+  +Long consentId
+  +String consentType
+  +String consentVersion
+  +Boolean granted
+  +LocalDateTime grantedAt
+  +LocalDateTime revokedAt
+  +String proofRecord
+}
+
+User "1" -- "1" UserProfile : has
+User "1" -- "*" LoginHistory : has
+User "1" -- "*" PasswordHistory : has
+User "1" -- "*" MFASetup : has
+User "1" -- "*" APIToken : has
+User "1" -- "*" KYCVerification : undergoes
+User "1" -- "*" AuditLog : generates
+User "1" -- "*" ConsentRecord : provides
+User "1" -- "*" Role : assigned
+
+UserProfile "1" -- "*" Address : has
+KYCVerification "1" -- "*" UserDocument : contains
+KYCVerification "1" -- "1" User : belongs to
+Role "1" -- "*" Permission : has
+Role "1" -- "*" Policy : has
+
+@enduml

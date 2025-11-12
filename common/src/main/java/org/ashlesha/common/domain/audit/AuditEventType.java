@@ -1,0 +1,15 @@
+package org.ashlesha.common.domain.audit;
+
+public enum AuditEventType {
+    LOGIN_SUCCESS,
+    LOGIN_FAILURE,
+    PASSWORD_CHANGE,
+    PROFILE_UPDATE,
+    ROLE_ASSIGNMENT,
+    KYC_SUBMISSION,
+    DOCUMENT_UPLOAD,
+    CONSENT_GRANTED,
+    CONSENT_REVOKED,
+    ACCOUNT_LOCKED,
+    ACCOUNT_UNLOCKED
+}
